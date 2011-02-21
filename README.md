@@ -53,15 +53,6 @@ mochijson2 `{struct, proplist()}` example:
                              [{<<"bar">>,
                                {struct, [{<<"baz">>, <<"wibble">>}]}}]}}]}).
 
-mochijson2 `{struct, proplist()}` example:
-
-    <<"wibble">> =:= kvc:path(foo.bar.baz,
-                         {struct,
-                          [{<<"foo">>,
-                            {struct,
-                             [{<<"bar">>,
-                               {struct, [{<<"baz">>, <<"wibble">>}]}}]}}]}).
-
 Aggregate example:
 
     2.0 =:= kvc:path('foo.bar.baz.@avg',
