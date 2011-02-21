@@ -1,0 +1,11 @@
+{application, kvc,
+ [
+  {description, "Key Value Coding for Erlang data structures"},
+  {vsn, "1.0.0"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {env, []}
+ ]}.
