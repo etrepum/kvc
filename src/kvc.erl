@@ -28,7 +28,13 @@ path([K | Rest], P) ->
 value(K, P, Default) ->
     case proplist_type(P) of
         {Nested, list} ->
-            get_nested_values(K, Nested, make_ref());
+            R = make_ref(),
+            case get_nested_values(K, Nested, R) of
+                R ->
+                    Default;
+                V ->
+                    V
+            end;
         {{gb_trees, Tree}, Type} ->
             case gb_trees:lookup(normalize(K, Type), Tree) of
                 none ->
@@ -105,8 +111,6 @@ typeof_elem(B) when is_binary(B) ->
     binary;
 typeof_elem([N | _]) when is_integer(N) andalso N > 0 ->
     string;
-typeof_elem(L) when is_list(L) ->
-    list;
 typeof_elem(_) ->
     undefined.
 
@@ -134,7 +138,7 @@ normalize(K, string) when is_binary(K) ->
     binary_to_list(K);
 normalize(K, string) when is_atom(K) ->
     atom_to_list(K);
-normalize(K, _) ->
+normalize(K, undefined) ->
     K.
 
 -ifdef(TEST).
@@ -190,6 +194,33 @@ value_coercion_test() ->
                   end,
                   pairwise_combinations([a, <<"a">>, "a"])).
 
+value_aggregate_test() ->
+    ?assertEqual(
+       6,
+       kvc:value('@sum', [1, 2, 3], [])),
+    ?assertEqual(
+       6,
+       kvc:value("@sum", [1, 2, 3], [])),
+    ?assertEqual(
+       6,
+       kvc:value(<<"@sum">>, [1, 2, 3], [])),
+    ?assertEqual(
+       2.0,
+       kvc:value(<<"@avg">>, [1, 2, 3], [])),
+    ?assertEqual(
+       [],
+       kvc:value(<<"@avg">>, [], [])),
+    ok.
+
+path_edge_test() ->
+    ?assertEqual(
+       [bar],
+       kvc:path(foo, [[{foo, bar}], [{bar, baz}]])),
+    ?assertEqual(
+       [bar],
+       kvc:path(foo, [[{foo, bar}], [{bar, baz}]])),
+    ok.
+
 path_plist_test() ->
     lists:foreach(
       fun (F) ->
@@ -224,6 +255,14 @@ path_plist_test() ->
                    {struct,
                     [{<<"bar">>,
                       {struct, [{<<"baz">>, <<"wibble">>}]}}]}}]})),
+    ?assertEqual(
+       "wibble",
+       kvc:path(foo.bar.baz,
+                {struct,
+                 [{"foo",
+                   {struct,
+                    [{"bar",
+                      {struct, [{"baz", "wibble"}]}}]}}]})),
        ok.
 
 -endif.
