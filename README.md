@@ -10,7 +10,7 @@ kvc supports Key Value Coding-like queries on common Erlang data structures.
 A common use case for kvc is to quickly access one or more deep values in
 decoded JSON, or some other nested data structure. It can also help with some
 aggregate operations. It solves similar problems that you might want to
-use a tool like XPath or jQuery for, but it is far simpler but strictly less
+use a tool like XPath or jQuery for, but it is far simpler and strictly less
 powerful.
 
 The following common Erlang data structures are supported:
