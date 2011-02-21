@@ -5,6 +5,7 @@
 %% used Erlang data structures.
 -module(kvc).
 -export([path/2, value/3]).
+-compile([export_all]).
 
 %% @type kvc_key() = binary() | atom() | string().
 %% @type kvc_obj_node() = proplist() | {struct, proplist()} | dict() | gb_tree().
@@ -175,16 +176,43 @@ path_aggregate_test() ->
                            [{foo, [[taco], [taco], [grande]]}]))),
     ok.
 
+pairwise_combinations(L) ->
+    pairwise_combinations(L, []).
+
+pairwise_combinations([], Acc) ->
+    lists:append(lists:reverse(Acc));
+pairwise_combinations(L=[H | T], Acc) ->
+    pairwise_combinations(T, [[{H, E} || E <- L] | Acc]).
+
+value_coercion_test() ->
+    lists:foreach(fun ({K0, K1}) ->
+                          ?assertEqual(bar, kvc:value(K0, [{K1, bar}], []))
+                  end,
+                  pairwise_combinations([a, <<"a">>, "a"])).
+
 path_plist_test() ->
-    ?assertEqual(
-       baz,
-       kvc:path(foo.bar, gb_trees:from_orddict([{foo, [{bar, baz}]}]))),
-    ?assertEqual(
-       [],
-       kvc:path(foo.bar, gb_trees:from_orddict([{foo, [{baz, baz}]}]))),
+    lists:foreach(
+      fun (F) ->
+              ?assertEqual(
+                 baz,
+                 kvc:path(foo.bar, F([{foo, [{bar, baz}]}]))),
+              ?assertEqual(
+                 [],
+                 kvc:path(foo.bar, F([{foo, [{baz, baz}]}]))),
+              ?assertEqual(
+                 [],
+                 kvc:path(foo.bar, F([{not_foo, ok}]))),
+              ?assertEqual(
+                 [],
+                 kvc:path(foo.bar, F([])))
+      end,
+      [fun gb_trees:from_orddict/1, fun dict:from_list/1]),
     ?assertEqual(
        wibble,
        kvc:path(foo.bar.baz, [{foo, [{bar, [{baz, wibble}]}]}])),
+    ?assertEqual(
+       [],
+       kvc:path(foo.bar.baz.invalid_proplist, [{foo, [{bar, [{baz, wibble}]}]}])),
     ?assertEqual(
        [],
        kvc:path(foo.bar.baz, [{foo, [{bar, [{bar, wibble}]}]}])),
