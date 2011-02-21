@@ -221,6 +221,18 @@ path_edge_test() ->
        kvc:path(foo, [[{foo, bar}], [{bar, baz}]])),
     ok.
 
+value_edge_test() ->
+    ?assertEqual(
+       [],
+       kvc:value(foo, [{1, 2}], [])),
+    ?assertEqual(
+       [],
+       kvc:value(<<255>>, [{foo, ok}], [])),
+    ?assertEqual(
+       [],
+       kvc:value([256], [{foo, ok}], [])),
+    ok.
+
 path_plist_test() ->
     lists:foreach(
       fun (F) ->
@@ -263,6 +275,12 @@ path_plist_test() ->
                    {struct,
                     [{"bar",
                       {struct, [{"baz", "wibble"}]}}]}}]})),
-       ok.
+    ?assertEqual(
+       ok,
+       kvc:value("foo", [{foo, ok}], [])),
+    ?assertEqual(
+       ok,
+       kvc:value("foo", [{<<"foo">>, ok}], [])),
+    ok.
 
 -endif.
