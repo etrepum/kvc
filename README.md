@@ -40,12 +40,14 @@ Not used in production, but it has a test suite that passes.
 Usage:
 ------
 
-`proplist()`:
+* Simple `proplist()` example:
+
 <code>
 wibble =:= kvc:path(foo.bar.baz, [{foo, [{bar, [{baz, wibble}]}]}]).
 </code>
 
-mochijson2 `{struct, proplist()}` example:
+* mochijson2 `{struct, proplist()}` example:
+
 <code>
 <<"wibble">> =:= kvc:path(foo.bar.baz,
                      {struct,
@@ -55,7 +57,8 @@ mochijson2 `{struct, proplist()}` example:
                            {struct, [{<<"baz">>, <<"wibble">>}]}}]}}]}).
 </code>
 
-mochijson2 `{struct, proplist()}` example:
+* mochijson2 `{struct, proplist()}` example:
+
 <code>
 <<"wibble">> =:= kvc:path(foo.bar.baz,
                      {struct,
@@ -63,4 +66,15 @@ mochijson2 `{struct, proplist()}` example:
                         {struct,
                          [{<<"bar">>,
                            {struct, [{<<"baz">>, <<"wibble">>}]}}]}}]}).
+</code>
+
+* Aggregate example:
+
+<code>
+2.0 =:= kvc:path('foo.bar.baz.@avg',
+                 {struct,
+                  [{<<"foo">>,
+                   {struct,
+                    [{<<"bar">>,
+                     {struct, [{<<"baz">>, [1, 2, 3]}]}}]}}]}).
 </code>
