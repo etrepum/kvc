@@ -42,39 +42,31 @@ Usage:
 
 * Simple `proplist()` example:
 
-<code>
-wibble =:= kvc:path(foo.bar.baz, [{foo, [{bar, [{baz, wibble}]}]}]).
-</code>
+    wibble =:= kvc:path(foo.bar.baz, [{foo, [{bar, [{baz, wibble}]}]}]).
 
 * mochijson2 `{struct, proplist()}` example:
 
-<code>
-<<"wibble">> =:= kvc:path(foo.bar.baz,
-                     {struct,
-                      [{<<"foo">>,
-                        {struct,
-                         [{<<"bar">>,
-                           {struct, [{<<"baz">>, <<"wibble">>}]}}]}}]}).
-</code>
+    <<"wibble">> =:= kvc:path(foo.bar.baz,
+                         {struct,
+                          [{<<"foo">>,
+                            {struct,
+                             [{<<"bar">>,
+                               {struct, [{<<"baz">>, <<"wibble">>}]}}]}}]}).
 
 * mochijson2 `{struct, proplist()}` example:
 
-<code>
-<<"wibble">> =:= kvc:path(foo.bar.baz,
-                     {struct,
-                      [{<<"foo">>,
-                        {struct,
-                         [{<<"bar">>,
-                           {struct, [{<<"baz">>, <<"wibble">>}]}}]}}]}).
-</code>
+    <<"wibble">> =:= kvc:path(foo.bar.baz,
+                         {struct,
+                          [{<<"foo">>,
+                            {struct,
+                             [{<<"bar">>,
+                               {struct, [{<<"baz">>, <<"wibble">>}]}}]}}]}).
 
 * Aggregate example:
 
-<code>
-2.0 =:= kvc:path('foo.bar.baz.@avg',
-                 {struct,
-                  [{<<"foo">>,
-                   {struct,
-                    [{<<"bar">>,
-                     {struct, [{<<"baz">>, [1, 2, 3]}]}}]}}]}).
-</code>
+    2.0 =:= kvc:path('foo.bar.baz.@avg',
+                     {struct,
+                      [{<<"foo">>,
+                       {struct,
+                        [{<<"bar">>,
+                         {struct, [{<<"baz">>, [1, 2, 3]}]}}]}}]}).
