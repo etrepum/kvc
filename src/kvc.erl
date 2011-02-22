@@ -5,19 +5,26 @@
 %% used Erlang data structures.
 -module(kvc).
 -export([path/2, value/3]).
--compile([export_all]).
 
 %% @type kvc_key() = binary() | atom() | string().
-%% @type kvc_obj_node() = proplist() | {struct, proplist()} | dict() | gb_tree().
+%% @type kvc_obj_node() = proplist() | {struct, proplist()} | dict() | gb_tree() | term().
 %% @type kvc_obj() = kvc_obj_node() | [kvc_obj_node()] | [].
+%% @type elem_type() = atom | binary | string | undefined.
+-type elem_type() :: atom | binary | string | list | undefined.
+-type kvc_obj() :: kvc_obj_node() | [kvc_obj_node()] | list().
+-type kvc_key() :: binary() | atom() | string().
+-type proplist() :: [{kvc_key(), kvc_obj()}].
+-type kvc_obj_node() :: proplist() | {struct, proplist()} | dict() | gb_tree() | term().
+-type typed_proplist() :: {proplist() | {gb_tree, gb_tree()}, elem_type()}.
 
 %% @spec path(kvc_key() | [kvc_key()], kvc_obj()) -> term() | []
-path(B, P) when is_binary(B) ->
-    path(binary:split(B, <<".">>, [global]), P);
-path(A, P) when is_atom(A) ->
-    path(atom_to_binary(A, utf8), P);
-path(L=[N | _], P) when is_integer(N) ->
-    path(iolist_to_binary(L), P);
+%% @doc Return the result of the query Path on P.
+path(Path, P) when is_binary(Path) ->
+    path(binary:split(Path, <<".">>, [global]), P);
+path(Path, P) when is_atom(Path) ->
+    path(atom_to_binary(Path, utf8), P);
+path(Path=[N | _], P) when is_integer(N) ->
+    path(iolist_to_binary(Path), P);
 path([], P) ->
     P;
 path([K | Rest], P) ->
@@ -35,7 +42,7 @@ value(K, P, Default) ->
                 V ->
                     V
             end;
-        {{gb_trees, Tree}, Type} ->
+        {{gb_tree, Tree}, Type} ->
             case gb_trees:lookup(normalize(K, Type), Tree) of
                 none ->
                     Default;
@@ -48,9 +55,7 @@ value(K, P, Default) ->
                     Default;
                 {_, V} ->
                     V
-            end;
-        undefined ->
-            Default
+            end
     end.
 
 get_nested_values(<<"@max">>, L, _R) ->
@@ -91,20 +96,33 @@ get_nested_values(K, [L | Rest], R) ->
 get_nested_values(_K, [], _R) ->
     [].
 
+-spec proplist_type(term()) -> typed_proplist().
 proplist_type(P=[{K, _} | _]) ->
     {P, typeof_elem(K)};
 proplist_type({struct, P=[{K, _} | _]}) ->
     {P, typeof_elem(K)};
 proplist_type(L) when is_list(L) ->
     {L, list};
-proplist_type(D) when element(1, D) =:= dict ->
-    proplist_type(dict:to_list(D));
-proplist_type(T={N, {_, _, _, _}}) when is_integer(N) andalso N > 0 ->
-    {K, _V} = gb_trees:smallest(T),
-    {{gb_trees, T}, typeof_elem(K)};
-proplist_type(_) ->
-    undefined.
+proplist_type(D) ->
+    first_of([fun () ->
+                      proplist_type(dict:to_list(D))
+              end,
+              fun () ->
+                      {K, _V} = gb_trees:smallest(D),
+                      {{gb_tree, D}, typeof_elem(K)}
+              end,
+              fun () ->
+                      {[], undefined}
+              end]).
 
+first_of([F | Rest]) ->
+    try F()
+    catch error:_ ->
+            first_of(Rest)
+    end.
+
+
+%% @spec typeof_elem(term()) -> typeof_elem()
 typeof_elem(A) when is_atom(A) ->
     atom;
 typeof_elem(B) when is_binary(B) ->
@@ -114,6 +132,7 @@ typeof_elem([N | _]) when is_integer(N) andalso N > 0 ->
 typeof_elem(_) ->
     undefined.
 
+%% @spec normalize(term(), elem_type()) -> term()
 normalize(K, atom) when is_atom(K) ->
     K;
 normalize(K, atom) when is_binary(K) ->
