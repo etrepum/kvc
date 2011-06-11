@@ -61,3 +61,11 @@ Aggregate example:
                        {struct,
                         [{<<"bar">>,
                          {struct, [{<<"baz">>, [1, 2, 3]}]}}]}}]}).
+
+to_proplist normalization:
+
+    [{<<"foo">>, [{<<"bar">>, <<"baz">>}]}] =:=
+        kvc:to_proplist({struct,
+                         [{<<"foo">>,
+                           {struct,
+                            [{<<"bar">>, <<"baz">>}]}}]}).

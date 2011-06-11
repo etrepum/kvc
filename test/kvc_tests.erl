@@ -142,6 +142,14 @@ path_plist_test() ->
        kvc:value("foo", [{<<"foo">>, ok}], [])),
     ok.
 
+to_proplist_readme_test() ->
+    ?assertEqual(
+       [{<<"foo">>, [{<<"bar">>, <<"baz">>}]}],
+       kvc:to_proplist({struct,
+                        [{<<"foo">>,
+                          {struct,
+                           [{<<"bar">>, <<"baz">>}]}}]})).
+
 prop_to_proplist_identity() ->
     ?FORALL(P, union([strict_proplist(), list(integer()),
                       integer(), tuple([integer(), integer()])]),
