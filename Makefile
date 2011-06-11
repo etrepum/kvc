@@ -1,4 +1,5 @@
 REBAR=`which rebar || ./rebar`
+.PHONY: all edoc test clean
 
 all:
 	@$(REBAR) get-deps compile
