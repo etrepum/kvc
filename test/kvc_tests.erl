@@ -6,6 +6,16 @@
 -include_lib("proper/include/proper.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
+-type strict_key() :: kvc:kvc_key().
+-type strict_proplist() :: [{strict_key(), strict_value()}].
+-type strict_value() :: strict_key() | strict_proplist() | [strict_value()].
+-type container_type() :: gb_trees | dict | struct | proplist.
+
+proper_test_() ->
+    [{atom_to_list(F),
+      fun () -> ?assert(proper:quickcheck(?MODULE:F(), [long_result])) end}
+     || {F, 0} <- ?MODULE:module_info(exports), F > 'prop_', F < 'prop`'].
+
 path_aggregate_test() ->
     ?assertEqual(
        [taco, taco, grande],
@@ -42,20 +52,6 @@ path_aggregate_test() ->
        lists:sort(kvc:path(<<"foo.@distinctUnionOfArrays">>,
                            [{foo, [[taco], [taco], [grande]]}]))),
     ok.
-
-pairwise_combinations(L) ->
-    pairwise_combinations(L, []).
-
-pairwise_combinations([], Acc) ->
-    lists:append(lists:reverse(Acc));
-pairwise_combinations(L=[H | T], Acc) ->
-    pairwise_combinations(T, [[{H, E} || E <- L] | Acc]).
-
-value_coercion_test() ->
-    lists:foreach(fun ({K0, K1}) ->
-                          ?assertEqual(bar, kvc:value(K0, [{K1, bar}], []))
-                  end,
-                  pairwise_combinations([a, <<"a">>, "a"])).
 
 value_aggregate_test() ->
     ?assertEqual(
@@ -145,3 +141,32 @@ path_plist_test() ->
        ok,
        kvc:value("foo", [{<<"foo">>, ok}], [])),
     ok.
+
+prop_to_proplist_identity() ->
+    ?FORALL(P, union([strict_proplist(), list(integer()),
+                      integer(), tuple([integer(), integer()])]),
+            kvc:to_proplist(P) =:= P).
+
+
+-spec make_container(container_type(), strict_proplist()) -> kvc:kvc_obj_node().
+make_container(proplist, P) ->
+    P;
+make_container(struct, P) ->
+    {struct, P};
+make_container(dict, P) ->
+    dict:from_list(P);
+make_container(gb_trees, P) ->
+    gb_trees:from_orddict(orddict:from_list(P)).
+
+prop_value_coercion() ->
+    Keys = union([a, <<"a">>, "a"]),
+    ?FORALL({K0, K1, CtrType}, {Keys, Keys, container_type()},
+            bar =:= kvc:value(K0, make_container(CtrType, [{K1, bar}]), [])).
+
+prop_to_proplist_shallow() ->
+    ?FORALL({P, CtrType}, {strict_proplist(), container_type()},
+            begin
+                P1 = orddict:from_list(P),
+                Ctr = make_container(CtrType, P1),
+                P1 =:= orddict:from_list(kvc:to_proplist(Ctr))
+            end).
