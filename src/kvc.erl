@@ -6,7 +6,8 @@
 -module(kvc).
 -export([path/2, value/3, to_proplist/1]).
 
--type elem_type() :: atom | binary | string | list | undefined.
+-type elem_key_type() :: atom | binary | string | undefined.
+-type elem_type() :: list | elem_key_type().
 -type kvc_obj() :: kvc_obj_node() | [kvc_obj_node()] | list().
 -type kvc_key() :: binary() | atom() | string().
 -type proplist() :: [{kvc_key(), kvc_obj()}].
@@ -64,13 +65,16 @@ to_proplist(P) when is_list(P) ->
     lists:map(fun to_proplist/1, P);
 to_proplist({struct, P}) ->
     to_proplist(P);
-to_proplist(T) when is_tuple(T) ->
+to_proplist(P) when is_atom(P) orelse is_bitstring(P) orelse is_number(P) orelse
+                    is_pid(P) orelse is_port(P) orelse is_reference(P) ->
+    %% ^^ do what we can to avoid checking is_tuple(P) directly so dialyzer
+    %%    doesn't think we are cheating to find opaque types.
+    P;
+to_proplist(T) ->
     first_of(
       [fun () -> to_proplist(gb_trees:to_list(T)) end,
        fun () -> to_proplist(dict:to_list(T)) end,
-       fun () -> T end]);
-to_proplist(P) ->
-    P.
+       fun () -> T end]).
 
 %% Internal API
 
@@ -138,7 +142,7 @@ first_of([F | Rest]) ->
     end.
 
 
--spec typeof_elem(term()) -> elem_type().
+-spec typeof_elem(term()) -> elem_key_type().
 typeof_elem(A) when is_atom(A) ->
     atom;
 typeof_elem(B) when is_binary(B) ->
