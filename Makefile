@@ -1,4 +1,4 @@
-REBAR=`which rebar || ./rebar`
+REBAR ?= $(shell which rebar 2>/dev/null || which ./rebar)
 .PHONY: all edoc test clean
 
 all:
