@@ -173,7 +173,6 @@ key() ->
 
 value(S) ->
     ?LAZY(union([key(), container(S), resize(S, list(value(S div 2)))])).
-    %%?LAZY(union([key(), container(), ?SIZED(S, resize(S div 10, list(value())))])).
 
 pair(S) ->
     {key(), value(S)}.
