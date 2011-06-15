@@ -59,24 +59,52 @@ value(K, P, Default) ->
 
 %% @doc Normalize P to nested proplists.
 -spec to_proplist(kvc_obj()) -> kvc_obj().
-to_proplist(P=[{_, _} | _]) ->
-    [{K, to_proplist(V)} || {K, V} <- P];
-to_proplist(P) when is_list(P) ->
-    lists:map(fun to_proplist/1, P);
-to_proplist({struct, P}) ->
-    to_proplist(P);
 to_proplist(P) when is_atom(P) orelse is_bitstring(P) orelse is_number(P) orelse
                     is_pid(P) orelse is_port(P) orelse is_reference(P) ->
     %% ^^ do what we can to avoid checking is_tuple(P) directly so dialyzer
     %%    doesn't think we are cheating to find opaque types.
     P;
+to_proplist({struct, L}) ->
+    to_proplist_pl(L);
+to_proplist([]) ->
+    [];
+to_proplist(L=[{struct, _} | _]) ->
+    to_proplist_l(L);
+to_proplist(L=[{K, _} | _]) when not is_integer(K) ->
+    %% gb_trees is an {integer(), _}
+    to_proplist_pl(L);
+to_proplist(L=[_ | _]) ->
+    first_of(
+      [fun to_proplist_gb_l/1,
+       fun to_proplist_pl/1,
+       fun to_proplist_l/1], L);
 to_proplist(T) ->
     first_of(
-      [fun () -> to_proplist(gb_trees:to_list(T)) end,
-       fun () -> to_proplist(dict:to_list(T)) end,
-       fun () -> T end]).
+      [fun to_proplist_gb/1,
+       fun to_proplist_dict/1,
+       fun identity/1], T).
 
 %% Internal API
+
+to_proplist_l(L) ->
+    [to_proplist(V) || V <- L].
+
+to_proplist_pl(L=[{_, _} | _]) ->
+    [{K, to_proplist(V)} || {K, V} <- L];
+to_proplist_pl([]) ->
+    [].
+
+to_proplist_gb_l([H | T]) ->
+    [to_proplist_gb(H) | to_proplist_l(T)].
+
+to_proplist_gb(T) ->
+    to_proplist(gb_trees:to_list(T)).
+
+to_proplist_dict(T) ->
+    to_proplist(dict:to_list(T)).
+
+identity(T) ->
+    T.
 
 get_nested_values(<<"@max">>, L, _R) ->
     lists:max(L);
@@ -123,22 +151,26 @@ proplist_type({struct, P=[{K, _} | _]}) ->
     {P, typeof_elem(K)};
 proplist_type(L) when is_list(L) ->
     {L, list};
-proplist_type(D) ->
-    first_of([fun () ->
-                      proplist_type(dict:to_list(D))
-              end,
-              fun () ->
-                      {K, _V} = gb_trees:smallest(D),
-                      {{gb_tree, D}, typeof_elem(K)}
-              end,
-              fun () ->
-                      {[], undefined}
-              end]).
+proplist_type(V) ->
+    first_of([fun proplist_type_d/1,
+              fun proplist_type_gb/1,
+              fun proplist_type_undefined/1], V).
 
-first_of([F | Rest]) ->
-    try F()
+proplist_type_d(D) ->
+    proplist_type(dict:to_list(D)).
+
+proplist_type_gb(D) ->
+    {K, _V} = gb_trees:smallest(D),
+    {{gb_tree, D}, typeof_elem(K)}.
+
+proplist_type_undefined(_) ->
+    {[], undefined}.
+
+
+first_of([F | Rest], V) ->
+    try F(V)
     catch error:_ ->
-            first_of(Rest)
+            first_of(Rest, V)
     end.
 
 
