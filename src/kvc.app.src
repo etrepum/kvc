@@ -1,5 +1,5 @@
 {application, kvc,
  [
   {description, "Key Value Coding for Erlang data structures"},
-  {vsn, "1.1.1"}
+  {vsn, "1.2"}
  ]}.

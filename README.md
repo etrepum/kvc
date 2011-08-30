@@ -19,7 +19,8 @@ The following common Erlang data structures are supported:
 * `dict()`
 * `gb_trees()`
 * `proplist()`
-* `{struct, proplist()}`
+* `{struct, proplist()}` (commonly used in mochijson2)
+* `{proplist()}` ([EEP 18](http://www.erlang.org/eeps/eep-0018.html))
 
 Only the following data types are permitted for keys, and they must be UTF-8
 if any type coercion takes place:

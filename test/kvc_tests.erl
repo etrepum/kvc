@@ -11,7 +11,7 @@
 -type strict_key() :: kvc:kvc_key().
 -type strict_proplist() :: [{strict_key(), strict_value()}].
 -type strict_value() :: strict_key() | strict_proplist() | [strict_value()].
--type container_type() :: gb_trees | dict | struct | proplist.
+-type container_type() :: gb_trees | dict | struct | proplist | eep0018.
 
 proper_test_() ->
     [{atom_to_list(F),
@@ -129,6 +129,12 @@ path_plist_test() ->
                     [{<<"bar">>,
                       {struct, [{<<"baz">>, <<"wibble">>}]}}]}}]})),
     ?assertEqual(
+       <<"wibble">>,
+       kvc:path(foo.bar.baz,
+                {[{<<"foo">>,
+                   {[{<<"bar">>,
+                      {[{<<"baz">>, <<"wibble">>}]}}]}}]})),
+    ?assertEqual(
        "wibble",
        kvc:path(foo.bar.baz,
                 {struct,
@@ -142,6 +148,9 @@ path_plist_test() ->
     ?assertEqual(
        ok,
        kvc:value("foo", [{<<"foo">>, ok}], [])),
+    ?assertEqual(
+       ok,
+       kvc:value("foo", {}, ok)),
     ok.
 
 to_proplist_readme_test() ->
@@ -163,6 +172,12 @@ make_container(proplist, P) ->
     P;
 make_container(struct, P) ->
     {struct, P};
+make_container(eep0018, P) ->
+    {P};
+make_container(eep0018_empty, []) ->
+    {};
+make_container(eep0018_empty, P) ->
+    {P};
 make_container(dict, P) ->
     dict:from_list(P);
 make_container(gb_trees, P) ->
@@ -178,7 +193,7 @@ pair(S) ->
     {key(), value(S)}.
 
 container(S) ->
-    ?LET({Type, Pairs}, {union([proplist, struct, dict, gb_trees]), resize(S, list(pair(S div 2)))},
+    ?LET({Type, Pairs}, {union([proplist, struct, dict, gb_trees, eep0018, eep0018_empty]), resize(S, list(pair(S div 2)))},
          make_container(Type, Pairs)).
 
 prop_value_coercion() ->

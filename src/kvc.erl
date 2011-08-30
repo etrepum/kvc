@@ -66,6 +66,10 @@ to_proplist(P) when is_atom(P) orelse is_bitstring(P) orelse is_number(P) orelse
     P;
 to_proplist({struct, L}) ->
     to_proplist_pl(L);
+to_proplist({L}) ->
+    to_proplist_pl(L);
+to_proplist({}) ->
+    [];
 to_proplist([]) ->
     [];
 to_proplist(L=[{struct, _} | _]) ->
@@ -149,6 +153,10 @@ proplist_type(P=[{K, _} | _]) ->
     {P, typeof_elem(K)};
 proplist_type({struct, P=[{K, _} | _]}) ->
     {P, typeof_elem(K)};
+proplist_type({P=[{K, _} | _]}) ->
+    {P, typeof_elem(K)};
+proplist_type({}) ->
+    {[], undefined};
 proplist_type(L) when is_list(L) ->
     {L, list};
 proplist_type(V) ->
