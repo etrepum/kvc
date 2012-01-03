@@ -1,3 +1,7 @@
+Version 1.2.1 released 2012-01-03
+
+* Added `registered` and `applications` parameters to .app for systools
+
 Version 1.2 released 2011-08-29
 
 * Added support for EEP 18 style `{}` and `{proplist()}`
