@@ -4,12 +4,13 @@
 %% @doc Implementation of Key Value Coding style "queries" for commonly
 %% used Erlang data structures.
 -module(kvc).
--export([path/2, value/3, to_proplist/1]).
+-export([path/3, path/2, value/3, to_proplist/1]).
 
 -type elem_key_type() :: atom | binary | string | undefined.
 -type elem_type() :: list | elem_key_type().
 -type kvc_obj() :: kvc_obj_node() | [kvc_obj_node()] | list().
 -type kvc_key() :: binary() | atom() | string().
+-type kvc_delim() :: binary().
 -type proplist() :: [{kvc_key(), kvc_obj()}].
 -type kvc_obj_node() :: proplist() | {struct, proplist()} | dict() | gb_tree() | term().
 -type typed_proplist() :: {proplist() | {gb_tree, gb_tree()}, elem_type()}.
@@ -18,16 +19,21 @@
 
 %% @doc Return the result of the query Path on P.
 -spec path(kvc_key() | [kvc_key()], kvc_obj()) -> term() | [].
-path(Path, P) when is_binary(Path) ->
-    path(binary:split(Path, <<".">>, [global]), P);
-path(Path, P) when is_atom(Path) ->
-    path(atom_to_binary(Path, utf8), P);
-path(Path=[N | _], P) when is_integer(N) ->
-    path(iolist_to_binary(Path), P);
-path([], P) ->
+path(Path, P) ->
+    path(Path, P, <<".">>).
+
+%% @doc Return the result of the query Path on P, using the supplied delimiter.
+-spec path(kvc_key() | [kvc_key()], kvc_obj(), kvc_delim()) -> term() | [].
+path(Path, P, Delim) when is_binary(Path) ->
+    path(binary:split(Path, Delim, [global]), P);
+path(Path, P, Delim) when is_atom(Path) ->
+    path(atom_to_binary(Path, utf8), P, Delim);
+path(Path=[N | _], P, Delim) when is_integer(N) ->
+    path(iolist_to_binary(Path), P, Delim);
+path([], P, _) ->
     P;
-path([K | Rest], P) ->
-    path(Rest, value(K, P, [])).
+path([K | Rest], P, Delim) ->
+    path(Rest, value(K, P, []), Delim).
 
 %% @doc Return the immediate result of the query for key K in P.
 -spec value(kvc_key(), kvc_obj(), term()) -> term().
