@@ -19,11 +19,11 @@
 %% @doc Return the result of the query Path on P.
 -spec path(kvc_key() | [kvc_key()], kvc_obj()) -> term() | [].
 path(Path, P) when is_binary(Path) ->
-    path(binary:split(Path, <<".">>, [global]), P);
+    path(binary_to_list(Path), P);
 path(Path, P) when is_atom(Path) ->
     path(atom_to_binary(Path, utf8), P);
 path(Path=[N | _], P) when is_integer(N) ->
-    path(iolist_to_binary(Path), P);
+    path(string:tokens(Path, "."), P);
 path([], P) ->
     P;
 path([K | Rest], P) ->
