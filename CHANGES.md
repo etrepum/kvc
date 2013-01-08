@@ -1,3 +1,10 @@
+Version 1.3.0 released 2013-01-08
+
+* Added a LICENSE file (MIT)
+* PropEr is now only a dependency when running the property based
+  tests. `rebar -C rebar.proper.config get-deps compile && rebar -C
+  rebar.proper.config eunit skip_deps=true`
+
 Version 1.2.1 released 2012-01-03
 
 * Added `registered` and `applications` parameters to .app for systools
