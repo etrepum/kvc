@@ -33,6 +33,26 @@ Another limitation is that it is assumed that the given data structure has a
 homogeneous key type. For example, if any key is `binary()`, all keys should
 be `binary()`.
 
+Collection Operators
+====================
+
+The following collection operators are supported. Note that the
+numerics have straightforward implementations and no special care is
+taken reduce floating point error.
+
+Their native representation is binary. Atom and string are also
+supported but require an additional type coercion for the look-up.
+
+* `<<"@sum">>`
+* `<<"@min">>`
+* `<<"@max">>`
+* `<<"@count">>`
+* `<<"@avg">>`
+* `<<"@distinctUnionOfArrays">>`
+* `<<"@distinctUnionOfObjects">>`
+* `<<"@unionOfArrays">>`
+* `<<"@unionOfObjects">>`
+
 Status:
 -------
 
@@ -69,6 +89,13 @@ Simple `proplist()` example:
 
 mochijson2 `{struct, proplist()}` example:
 
+    <<"wibble">> =:= kvc:path([<<"foo">>, <<"bar">>, <<"baz">>],
+                         {struct,
+                          [{<<"foo">>,
+                            {struct,
+                             [{<<"bar">>,
+                               {struct, [{<<"baz">>, <<"wibble">>}]}}]}}]}).
+
     <<"wibble">> =:= kvc:path(foo.bar.baz,
                          {struct,
                           [{<<"foo">>,
@@ -76,7 +103,7 @@ mochijson2 `{struct, proplist()}` example:
                              [{<<"bar">>,
                                {struct, [{<<"baz">>, <<"wibble">>}]}}]}}]}).
 
-Aggregate example:
+Collection operator example:
 
     2.0 =:= kvc:path([<<"foo">>,<<"bar">>,<<"baz">>,<<"@avg">>],
                      {struct,
