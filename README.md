@@ -11,7 +11,7 @@ A common use case for kvc is to quickly access one or more deep values in
 decoded JSON, or some other nested data structure. It can also help with some
 aggregate operations. It solves similar problems that you might want to
 use a tool like XPath or jQuery for, but it is far simpler and strictly less
-powerful.
+powerful. It's inspired by Apple's NSKeyValueCoding protocol from Objective-C.
 
 The following common Erlang data structures are supported:
 
@@ -38,12 +38,34 @@ Status:
 
 Not used in production, but it has a test suite that passes.
 
+If you decide to use this in your production app, you should use lists
+for paths and try to use the same type as the keys in your data
+structure.
+
+If you'd like to contribute to kvc, a good implementation for setters
+is the biggest missing piece.
+
 Usage:
 ------
 
+Two styles of queries are supported, the more performant native
+interface uses a list of keys for the path. If a string, binary, or
+atom are given then it will be split on '.' peroids to form this key list.
+
 Simple `proplist()` example:
 
+    %% Native key list of atoms that match the data type (fastest)
+    wibble =:= kvc:path([foo, bar, baz], [{foo, [{bar, [{baz, wibble}]}]}]).
+
+    %% Native key list of binaries, does not match key data type (slower)
+    wibble =:= kvc:path([<<"foo">>, <<"bar">>, <<"baz">>],
+                        [{foo, [{bar, [{baz, wibble}]}]}]).
+
+    %% These bare keys must be parsed first (slowest)
     wibble =:= kvc:path(foo.bar.baz, [{foo, [{bar, [{baz, wibble}]}]}]).
+    wibble =:= kvc:path(<<"foo.bar.baz">>, [{foo, [{bar, [{baz, wibble}]}]}]).
+    wibble =:= kvc:path("foo.bar.baz", [{foo, [{bar, [{baz, wibble}]}]}]).
+
 
 mochijson2 `{struct, proplist()}` example:
 
@@ -55,6 +77,13 @@ mochijson2 `{struct, proplist()}` example:
                                {struct, [{<<"baz">>, <<"wibble">>}]}}]}}]}).
 
 Aggregate example:
+
+    2.0 =:= kvc:path([<<"foo">>,<<"bar">>,<<"baz">>,<<"@avg">>],
+                     {struct,
+                      [{<<"foo">>,
+                       {struct,
+                        [{<<"bar">>,
+                         {struct, [{<<"baz">>, [1, 2, 3]}]}}]}}]}).
 
     2.0 =:= kvc:path('foo.bar.baz.@avg',
                      {struct,
