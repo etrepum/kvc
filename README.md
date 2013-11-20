@@ -82,7 +82,7 @@ Simple `proplist()` example:
                         [{foo, [{bar, [{baz, wibble}]}]}]).
 
     %% These bare keys must be parsed first (slowest)
-    wibble =:= kvc:path(foo.bar.baz, [{foo, [{bar, [{baz, wibble}]}]}]).
+    wibble =:= kvc:path('foo.bar.baz', [{foo, [{bar, [{baz, wibble}]}]}]).
     wibble =:= kvc:path(<<"foo.bar.baz">>, [{foo, [{bar, [{baz, wibble}]}]}]).
     wibble =:= kvc:path("foo.bar.baz", [{foo, [{bar, [{baz, wibble}]}]}]).
 
@@ -96,7 +96,7 @@ mochijson2 `{struct, proplist()}` example:
                              [{<<"bar">>,
                                {struct, [{<<"baz">>, <<"wibble">>}]}}]}}]}).
 
-    <<"wibble">> =:= kvc:path(foo.bar.baz,
+    <<"wibble">> =:= kvc:path('foo.bar.baz',
                          {struct,
                           [{<<"foo">>,
                             {struct,
