@@ -86,31 +86,31 @@ path_plist_test() ->
       fun (F) ->
               ?assertEqual(
                  baz,
-                 kvc:path(foo.bar, F([{foo, [{bar, baz}]}]))),
+                 kvc:path('foo.bar', F([{foo, [{bar, baz}]}]))),
               ?assertEqual(
                  [],
-                 kvc:path(foo.bar, F([{foo, [{baz, baz}]}]))),
+                 kvc:path('foo.bar', F([{foo, [{baz, baz}]}]))),
               ?assertEqual(
                  [],
-                 kvc:path(foo.bar, F([{not_foo, ok}]))),
+                 kvc:path('foo.bar', F([{not_foo, ok}]))),
               ?assertEqual(
                  [],
-                 kvc:path(foo.bar, F([])))
+                 kvc:path('foo.bar', F([])))
       end,
       [fun gb_trees:from_orddict/1, fun dict:from_list/1]),
     ?assertEqual(
        wibble,
-       kvc:path(foo.bar.baz, [{foo, [{bar, [{baz, wibble}]}]}])),
+       kvc:path('foo.bar.baz', [{foo, [{bar, [{baz, wibble}]}]}])),
     ?assertEqual(
        [],
-       kvc:path(foo.bar.baz.invalid_proplist,
+       kvc:path('foo.bar.baz.invalid_proplist',
                 [{foo, [{bar, [{baz, wibble}]}]}])),
     ?assertEqual(
        [],
-       kvc:path(foo.bar.baz, [{foo, [{bar, [{bar, wibble}]}]}])),
+       kvc:path('foo.bar.baz', [{foo, [{bar, [{bar, wibble}]}]}])),
     ?assertEqual(
        <<"wibble">>,
-       kvc:path(foo.bar.baz,
+       kvc:path('foo.bar.baz',
                 {struct,
                  [{<<"foo">>,
                    {struct,
@@ -118,13 +118,13 @@ path_plist_test() ->
                       {struct, [{<<"baz">>, <<"wibble">>}]}}]}}]})),
     ?assertEqual(
        <<"wibble">>,
-       kvc:path(foo.bar.baz,
+       kvc:path('foo.bar.baz',
                 {[{<<"foo">>,
                    {[{<<"bar">>,
                       {[{<<"baz">>, <<"wibble">>}]}}]}}]})),
     ?assertEqual(
        "wibble",
-       kvc:path(foo.bar.baz,
+       kvc:path('foo.bar.baz',
                 {struct,
                  [{"foo",
                    {struct,
