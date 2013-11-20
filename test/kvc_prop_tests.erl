@@ -7,9 +7,9 @@
 -type strict_key() :: kvc:kvc_key().
 -type strict_proplist() :: [{strict_key(), strict_value()}].
 -type strict_value() :: strict_key() | strict_proplist() | [strict_value()].
--type container_type() :: gb_trees | dict | struct | proplist | eep0018.
 
 -ifdef(USE_PROPER).
+-type container_type() :: gb_trees | dict | struct | proplist | eep0018.
 -include_lib("proper/include/proper.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
