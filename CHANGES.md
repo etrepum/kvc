@@ -1,3 +1,8 @@
+Version 1.3.1 released 2013-11-20
+
+* Refactored tests to be compatible with R16
+  https://github.com/etrepum/kvc/pull/5
+
 Version 1.3.0 released 2013-01-08
 
 * Added a LICENSE file (MIT)
