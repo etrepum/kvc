@@ -81,6 +81,12 @@ value_edge_test() ->
        kvc:value([256], [{foo, ok}], [])),
     ok.
 
+alternative_delimiter_test() ->
+    ?assertEqual(
+        scm,
+        kvc:path("repositories/github.com/api",
+                [{repositories,[{"github.com", [{api,scm}]}]}], <<"/">>)).
+
 path_plist_test() ->
     lists:foreach(
       fun (F) ->
