@@ -4,7 +4,7 @@
 %% @doc Implementation of Key Value Coding style "queries" for commonly
 %% used Erlang data structures.
 -module(kvc).
--export([path/2, value/3, to_proplist/1]).
+-export([path/2, path/3, value/3, to_proplist/1]).
 
 -ifdef(namespaced_dicts).
 -type kvc_dict() :: dict:dict().
@@ -26,16 +26,20 @@
 
 %% @doc Return the result of the query Path on P.
 -spec path(kvc_key() | [kvc_key()], kvc_obj()) -> term() | [].
-path(Path, P) when is_binary(Path) ->
-    path(binary:split(Path, <<".">>, [global]), P);
-path(Path, P) when is_atom(Path) ->
-    path(atom_to_binary(Path, utf8), P);
-path(Path=[N | _], P) when is_integer(N) ->
-    path(iolist_to_binary(Path), P);
-path([], P) ->
+path(Path, P) ->
+    path(Path, P, []).
+
+-spec path(kvc_key() | [kvc_key()], kvc_obj(), term()) -> term().
+path(Path, P, Default) when is_binary(Path) ->
+    path(binary:split(Path, <<".">>, [global]), P, Default);
+path(Path, P, Default) when is_atom(Path) ->
+    path(atom_to_binary(Path, utf8), P, Default);
+path(Path=[N | _], P, Default) when is_integer(N) ->
+    path(iolist_to_binary(Path), P, Default);
+path([], P, _Default) ->
     P;
-path([K | Rest], P) ->
-    path(Rest, value(K, P, [])).
+path([K | Rest], P, Default) ->
+    path(Rest, value(K, P, Default)).
 
 %% @doc Return the immediate result of the query for key K in P.
 -spec value(kvc_key(), kvc_obj(), term()) -> term().
