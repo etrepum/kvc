@@ -36,10 +36,12 @@ path(Path, P, Default) when is_atom(Path) ->
     path(atom_to_binary(Path, utf8), P, Default);
 path(Path=[N | _], P, Default) when is_integer(N) ->
     path(iolist_to_binary(Path), P, Default);
+path([], [], Default) ->
+    Default;
 path([], P, _Default) ->
     P;
 path([K | Rest], P, Default) ->
-    path(Rest, value(K, P, Default)).
+    path(Rest, value(K, P, Default), Default).
 
 %% @doc Return the immediate result of the query for key K in P.
 -spec value(kvc_key(), kvc_obj(), term()) -> term().
