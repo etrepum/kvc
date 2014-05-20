@@ -101,10 +101,8 @@ check_list([[] | T0], [C | T1]) ->
     [] =:= kvc:to_proplist(C) andalso check_list(T0, T1);
 check_list([L | T0], [C | T1]) when is_list(L) ->
     check_list(L, C) andalso check_list(T0, T1);
-check_list([], []) ->
-    true;
-check_list(_, _) ->
-    false.
+check_list(A, B) ->
+    A =:= [] andalso B =:= [].
 
 prop_to_proplist_deep() ->
     ?FORALL(Container, container(8),

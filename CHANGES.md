@@ -1,3 +1,10 @@
+Version 1.4.0 released 2014-05-20
+
+* Erlang 17.0 compatibility
+  https://github.com/etrepum/kvc/pull/6
+* New kvc:path/3 API
+  https://github.com/etrepum/kvc/pull/7
+
 Version 1.3.1 released 2013-11-20
 
 * Refactored tests to be compatible with R16

@@ -148,3 +148,26 @@ to_proplist_readme_test() ->
                         [{<<"foo">>,
                           {struct,
                            [{<<"bar">>, <<"baz">>}]}}]})).
+
+path_default_test() ->
+    %% This shouldn't hit the default path at all
+    ?assertEqual(
+       1,
+       kvc:path([derp], [{derp, 1}])),
+    ?assertEqual(
+       1,
+       kvc:path([derp], [{derp, 1}], unused)),
+    %% The standard default is []
+    ?assertEqual(
+       [],
+       kvc:path([foo], [{derp, 1}])),
+    ?assertEqual(
+       default,
+       kvc:path([foo], [{derp, 1}], default)),
+    %% The default is *not* recursive
+    ?assertEqual(
+       [{bar, baz}],
+       kvc:path([foo, bar], [], [{bar, baz}])),
+    ?assertEqual(
+       [{foo, bar}],
+       kvc:path([foo, bar], [], [{foo, bar}])).
