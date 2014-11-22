@@ -19,7 +19,7 @@
 -type kvc_obj() :: kvc_obj_node() | [kvc_obj_node()] | list().
 -type kvc_key() :: binary() | atom() | string().
 -type proplist() :: [{kvc_key(), kvc_obj()}].
--type kvc_obj_node() :: proplist() | {struct, proplist()} | kvc_dict() | kvc_gb_tree() | term().
+-type kvc_obj_node() :: proplist() | {struct, proplist()} | [{}] | kvc_dict() | kvc_gb_tree() | term().
 -type typed_proplist() :: {proplist() | {gb_tree, kvc_gb_tree()}, elem_type()}.
 
 -export_type([proplist/0, kvc_key/0, kvc_obj/0]).
@@ -85,6 +85,8 @@ to_proplist({L}) ->
 to_proplist({}) ->
     [];
 to_proplist([]) ->
+    [];
+to_proplist([{}]) ->
     [];
 to_proplist(L=[{struct, _} | _]) ->
     to_proplist_l(L);
@@ -170,6 +172,8 @@ proplist_type({struct, P=[{K, _} | _]}) ->
 proplist_type({P=[{K, _} | _]}) ->
     {P, typeof_elem(K)};
 proplist_type({}) ->
+    {[], undefined};
+proplist_type([{}]) ->
     {[], undefined};
 proplist_type(L) when is_list(L) ->
     {L, list};

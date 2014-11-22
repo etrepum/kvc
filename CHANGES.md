@@ -1,3 +1,8 @@
+Version 1.5.0 released 2014-11-22
+
+* Fix support for EEP 18 empty objects `[{}]`
+  https://github.com/etrepum/kvc/issues/8
+
 Version 1.4.0 released 2014-05-20
 
 * Erlang 17.0 compatibility

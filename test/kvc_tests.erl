@@ -171,3 +171,8 @@ path_default_test() ->
     ?assertEqual(
        [{foo, bar}],
        kvc:path([foo, bar], [], [{foo, bar}])).
+
+jsx_object_test() ->
+    ?assertEqual(
+       not_found,
+       kvc:value(<<"foo">>, [{}], not_found)).

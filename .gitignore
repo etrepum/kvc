@@ -2,5 +2,6 @@
 /doc
 /ebin
 /deps
+/.rebar
 TEST-*.xml
 *.beam
