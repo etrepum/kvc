@@ -21,6 +21,7 @@ The following common Erlang data structures are supported:
 * `proplist()`
 * `{struct, proplist()}` (commonly used in mochijson2)
 * `{proplist()}` ([EEP 18](http://www.erlang.org/eeps/eep-0018.html))
+* `map()` Erlang 17+
 
 Only the following data types are permitted for keys, and they must be UTF-8
 if any type coercion takes place:
@@ -101,7 +102,14 @@ mochijson2 `{struct, proplist()}` example:
                           [{<<"foo">>,
                             {struct,
                              [{<<"bar">>,
-                               {struct, [{<<"baz">>, <<"wibble">>}]}}]}}]}).
+                             {struct, [{<<"baz">>, <<"wibble">>}]}}]}}]}).
+
+
+maps example:
+
+    <<"wibble">> = kvc:path("foo.bar.baz",
+                       #{<<"foo">> => #{<<"bar">> => #{<<"baz">> => <<"wibble">>}}}).
+
 
 Collection operator example:
 

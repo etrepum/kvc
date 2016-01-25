@@ -7,11 +7,11 @@
 -export([path/2, path/3, value/3, to_proplist/1]).
 
 -ifdef(namespaced_dicts).
--type kvc_dict() :: dict:dict().
--type kvc_gb_tree() :: gb_trees:tree().
+-type kvc_obj_node() :: proplist() | {struct, proplist()} | [{}] | dict:dict() | gb_trees:tree() | map() | term().
+-type typed_proplist() :: {proplist() | {gb_tree, gb_trees:tree()} | {map, map()}, elem_type()}.
 -else.
--type kvc_dict() :: dict().
--type kvc_gb_tree() :: gb_tree().
+-type kvc_obj_node() :: proplist() | {struct, proplist()} | [{}] | dict() | gb_tree() | term().
+-type typed_proplist() :: {proplist() | {gb_tree, gb_tree()}, elem_type()}.
 -endif.
 
 -type elem_key_type() :: atom | binary | string | undefined.
@@ -19,8 +19,6 @@
 -type kvc_obj() :: kvc_obj_node() | [kvc_obj_node()] | list().
 -type kvc_key() :: binary() | atom() | string().
 -type proplist() :: [{kvc_key(), kvc_obj()}].
--type kvc_obj_node() :: proplist() | {struct, proplist()} | [{}] | kvc_dict() | kvc_gb_tree() | term().
--type typed_proplist() :: {proplist() | {gb_tree, kvc_gb_tree()}, elem_type()}.
 
 -export_type([proplist/0, kvc_key/0, kvc_obj/0]).
 
@@ -60,6 +58,13 @@ value(K, P, Default) ->
                 none ->
                     Default;
                 {value, V} ->
+                    V
+            end;
+        {{map, Map}, Type} ->
+            case maps:find(normalize(K, Type), Map) of
+                error ->
+                    Default;
+                {ok, V} ->
                     V
             end;
         {Proplist, Type} ->
@@ -102,9 +107,13 @@ to_proplist(T) ->
     first_of(
       [fun to_proplist_gb/1,
        fun to_proplist_dict/1,
+       fun to_proplist_map/1,
        fun identity/1], T).
 
 %% Internal API
+
+to_proplist_map(Map) ->
+    to_proplist_pl(maps:to_list(Map)).
 
 to_proplist_l(L) ->
     [to_proplist(V) || V <- L].
@@ -180,6 +189,7 @@ proplist_type(L) when is_list(L) ->
 proplist_type(V) ->
     first_of([fun proplist_type_d/1,
               fun proplist_type_gb/1,
+              fun proplist_type_map/1,
               fun proplist_type_undefined/1], V).
 
 proplist_type_d(D) ->
@@ -188,6 +198,10 @@ proplist_type_d(D) ->
 proplist_type_gb(D) ->
     {K, _V} = gb_trees:smallest(D),
     {{gb_tree, D}, typeof_elem(K)}.
+
+proplist_type_map(D) ->
+    [K | _] = maps:keys(D),
+    {{map, D}, typeof_elem(K)}.
 
 proplist_type_undefined(_) ->
     {[], undefined}.

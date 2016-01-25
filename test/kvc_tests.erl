@@ -176,3 +176,16 @@ jsx_object_test() ->
     ?assertEqual(
        not_found,
        kvc:value(<<"foo">>, [{}], not_found)).
+
+-ifdef(namespaced_dicts).
+map_object_test_() ->
+    [?_assertEqual(
+        not_found,
+        kvc:path("foo.bar", #{<<"foo">> => #{<<"baz">> => val}}, not_found)),
+     ?_assertEqual(
+        val,
+        kvc:path("foo.bar", #{<<"foo">> => #{<<"bar">> => val}}, not_found)),
+     ?_assertEqual(
+        #{a => b},
+        kvc:path([foo, bar], #{foo => #{bar => #{a => b}}}, not_found))].
+-endif.
