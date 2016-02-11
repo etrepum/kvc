@@ -1,3 +1,8 @@
+Version 1.6.0 released 2016-02-11
+
+* Support for maps in Erlang 17 and later
+  https://github.com/etrepum/kvc/pull/9
+
 Version 1.5.0 released 2014-11-22
 
 * Fix support for EEP 18 empty objects `[{}]`
