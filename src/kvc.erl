@@ -9,9 +9,11 @@
 -ifdef(namespaced_dicts).
 -type kvc_obj_node() :: proplist() | {struct, proplist()} | [{}] | dict:dict() | gb_trees:tree() | map() | term().
 -type typed_proplist() :: {proplist() | {gb_tree, gb_trees:tree()} | {map, map()}, elem_type()}.
+-define(IF_MAPS(Exp), Exp).
 -else.
 -type kvc_obj_node() :: proplist() | {struct, proplist()} | [{}] | dict() | gb_tree() | term().
 -type typed_proplist() :: {proplist() | {gb_tree, gb_tree()}, elem_type()}.
+-define(IF_MAPS(_), ).
 -endif.
 
 -type elem_key_type() :: atom | binary | string | undefined.
@@ -60,6 +62,7 @@ value(K, P, Default) ->
                 {value, V} ->
                     V
             end;
+        ?IF_MAPS(
         {{map, Map}, Type} ->
             case maps:find(normalize(K, Type), Map) of
                 error ->
@@ -67,6 +70,7 @@ value(K, P, Default) ->
                 {ok, V} ->
                     V
             end;
+        )
         {Proplist, Type} ->
             case lists:keyfind(normalize(K, Type), 1, Proplist) of
                 false ->
@@ -112,8 +116,13 @@ to_proplist(T) ->
 
 %% Internal API
 
+-ifdef(namespaced_dicts).
 to_proplist_map(Map) ->
     to_proplist_pl(maps:to_list(Map)).
+-else.
+to_proplist_map(_) ->
+    throw(namespaced_dicts).
+-endif.
 
 to_proplist_l(L) ->
     [to_proplist(V) || V <- L].
@@ -199,9 +208,14 @@ proplist_type_gb(D) ->
     {K, _V} = gb_trees:smallest(D),
     {{gb_tree, D}, typeof_elem(K)}.
 
+-ifdef(namespaced_dicts).
 proplist_type_map(D) ->
     [K | _] = maps:keys(D),
     {{map, D}, typeof_elem(K)}.
+-else.
+proplist_type_map(_) ->
+    throw(namespaced_dicts).
+-endif.
 
 proplist_type_undefined(_) ->
     {[], undefined}.
@@ -210,6 +224,8 @@ proplist_type_undefined(_) ->
 first_of([F | Rest], V) ->
     try F(V)
     catch error:_ ->
+            first_of(Rest, V);
+          throw:namespaced_dicts ->
             first_of(Rest, V)
     end.
 
