@@ -8,6 +8,7 @@ edoc:
 	@$(REBAR) doc
 
 test:
+	@$(REBAR) xref
 	@$(REBAR) skip_deps=true eunit
 
 clean:

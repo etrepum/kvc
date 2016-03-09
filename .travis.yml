@@ -5,4 +5,6 @@ otp_release:
   - R15B03
   - R16B
 script:
- - rebar -C rebar.proper.config clean get-deps compile && rebar -C rebar.proper.config eunit skip_deps=true
+ - rebar -C rebar.proper.config clean get-deps compile
+ - rebar -C rebar.proper.config xref
+ - rebar -C rebar.proper.config eunit skip_deps=true
