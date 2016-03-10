@@ -193,6 +193,8 @@ proplist_type({}) ->
     {[], undefined};
 proplist_type([{}]) ->
     {[], undefined};
+proplist_type({[]}) ->
+    {[], undefined};
 proplist_type(L) when is_list(L) ->
     {L, list};
 proplist_type(V) ->
