@@ -1,3 +1,10 @@
+Version 1.7.0 released 2016-03-12
+
+* Test suite now runs xref
+  https://github.com/etrepum/kvc/pull/11
+* Support for `{[]}` empty objects
+  https://github.com/etrepum/kvc/pull/10
+
 Version 1.6.0 released 2016-02-11
 
 * Support for maps in Erlang 17 and later
